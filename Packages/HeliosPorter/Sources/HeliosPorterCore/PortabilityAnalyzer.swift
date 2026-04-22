@@ -50,7 +50,7 @@ public struct PortabilityAnalyzer {
             classification: classification,
             reasons: reasons,
             platformDependencies: platformDependencies,
-            recommendedTargets: recommendedTargets(for: classification, relativePath: relativePath)
+            bridgeCapabilities: bridgeCapabilities(for: classification, source: source)
         )
     }
 
@@ -120,7 +120,7 @@ public struct PortabilityAnalyzer {
         case .portable:
             return [
                 "Defines tab metadata and information architecture that can transfer directly into Helios.",
-                "Avoids AppKit-only APIs and can be re-expressed in either scaffold target without platform shims.",
+                "Avoids AppKit-only APIs and can be carried into the shared Helios manifest unchanged.",
             ]
         case .adapter_needed:
             var reasons = [
@@ -148,32 +148,39 @@ public struct PortabilityAnalyzer {
                 reasons.append("Uses NSPasteboard for clipboard flows that must become ClipboardService calls in Helios.")
             }
             if source.contains("NSWorkspace") {
-                reasons.append("Uses NSWorkspace for external navigation and file launching, which must be rebound to Windows shell services.")
+                reasons.append("Uses NSWorkspace for external navigation and file launching, which must be rebound to ExternalLinkService in the Windows bridge.")
             }
             if source.contains("NSOpenPanel") {
-                reasons.append("Uses NSOpenPanel for picker-heavy interactions, which need a Windows picker implementation and a redesigned server tools surface.")
+                reasons.append("Uses NSOpenPanel for picker-heavy interactions, which need FilePickerService and a redesigned server tools surface.")
             }
 
             return reasons
         }
     }
 
-    private func recommendedTargets(
+    private func bridgeCapabilities(
         for classification: PortabilityClass,
-        relativePath: String
-    ) -> [FrameworkTarget] {
+        source: String
+    ) -> [BridgeCapability] {
         switch classification {
         case .portable:
-            return [.swiftcrossui, .shaft]
+            return []
         case .adapter_needed:
-            if relativePath.hasSuffix("ManagementView.swift") ||
-                relativePath.hasSuffix("SidebarNavigation.swift") ||
-                relativePath.hasSuffix("ManagerHeader.swift") {
-                return [.swiftcrossui, .shaft]
-            }
-            return [.swiftcrossui, .shaft]
+            return []
         case .rewrite:
-            return [.swiftcrossui, .shaft]
+            var capabilities: [BridgeCapability] = []
+
+            if source.contains("NSPasteboard") {
+                capabilities.append(.clipboard)
+            }
+            if source.contains("NSWorkspace") {
+                capabilities.append(.externalLink)
+            }
+            if source.contains("NSOpenPanel") {
+                capabilities.append(.filePicker)
+            }
+
+            return capabilities
         }
     }
 }

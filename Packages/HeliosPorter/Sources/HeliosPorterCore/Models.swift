@@ -6,9 +6,32 @@ public enum PortabilityClass: String, Codable, CaseIterable {
     case rewrite
 }
 
-public enum FrameworkTarget: String, Codable, CaseIterable {
-    case swiftcrossui
-    case shaft
+public enum BridgeCapability: String, Codable, CaseIterable {
+    case clipboard
+    case externalLink = "external_link"
+    case filePicker = "file_picker"
+
+    public var serviceInterface: String {
+        switch self {
+        case .clipboard:
+            return "ClipboardService"
+        case .externalLink:
+            return "ExternalLinkService"
+        case .filePicker:
+            return "FilePickerService"
+        }
+    }
+
+    public var projectionNamespace: String {
+        switch self {
+        case .clipboard:
+            return "Windows.ApplicationModel.DataTransfer"
+        case .externalLink:
+            return "Windows.System"
+        case .filePicker:
+            return "Windows.Storage.Pickers"
+        }
+    }
 }
 
 public enum SliceDefinition: String, Codable, CaseIterable {
@@ -44,8 +67,13 @@ public enum SliceDefinition: String, Codable, CaseIterable {
             "ExternalLinkService",
             "ServerControlService",
             "SettingsNavigationService",
+            "FilePickerService",
         ]
     }
+
+    public var primaryUIFramework: String { "SwiftCrossUI" }
+
+    public var windowsBridgePackagePath: String { "Packages/HeliosWindowsBridge" }
 
     public var fixedNextSlices: [String] {
         ["chat_surface", "app_shell", "platform_services"]
@@ -58,15 +86,15 @@ public struct PortabilityFinding: Codable, Equatable {
     public let classification: PortabilityClass
     public let reasons: [String]
     public let platformDependencies: [String]
-    public let recommendedTargets: [FrameworkTarget]
+    public let bridgeCapabilities: [BridgeCapability]
 
     enum CodingKeys: String, CodingKey {
+        case bridgeCapabilities
         case sourcePath
         case symbols
         case classification = "class"
         case reasons
         case platformDependencies
-        case recommendedTargets
     }
 }
 
@@ -83,24 +111,24 @@ public struct PortabilityReport: Codable, Equatable {
     public let summary: PortabilitySummary
 }
 
-public struct FrameworkScore: Equatable {
-    public let target: FrameworkTarget
-    public let criteria: [String: Int]
-    public let total: Int
-    public let rationale: [String]
-}
-
-public struct ComparisonReport: Equatable {
+public struct ArchitectureDecision: Equatable {
     public let slice: SliceDefinition
-    public let scores: [FrameworkScore]
-    public let recommendedTarget: FrameworkTarget
-    public let recommendationReasons: [String]
+    public let primaryUIFramework: String
+    public let windowsBridgePackage: String
+    public let bridgeCapabilities: [BridgeCapability]
+    public let projectionNamespaces: [String]
+    public let rationale: [String]
+    public let serverRewriteZones: [String]
+    public let guardrails: [String]
 }
 
 public struct HeliosSliceManifest: Codable, Equatable {
     public let slice: SliceDefinition
     public let tabs: [String]
     public let serviceInterfaces: [String]
+    public let bridgeCapabilities: [BridgeCapability]
+    public let primaryUIFramework: String
+    public let windowsBridgePackage: String
     public let sourcePaths: [String]
     public let todoMarkers: [String]
 }
@@ -115,7 +143,6 @@ public enum HeliosPorterError: LocalizedError, Equatable {
     case invalidCommand(String)
     case missingOption(String)
     case invalidSlice(String)
-    case invalidTargets(String)
     case sourceFileMissing(String)
 
     public var errorDescription: String? {
@@ -126,8 +153,6 @@ public enum HeliosPorterError: LocalizedError, Equatable {
             return "Missing required option \(option)."
         case .invalidSlice(let value):
             return "Unsupported slice '\(value)'."
-        case .invalidTargets(let value):
-            return "Unsupported target list '\(value)'. Expected a comma-separated list using swiftcrossui and/or shaft."
         case .sourceFileMissing(let relativePath):
             return "Missing source file '\(relativePath)' in the repository root."
         }

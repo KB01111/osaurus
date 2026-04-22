@@ -1,18 +1,10 @@
 import Foundation
 
 enum HeliosPorterSupport {
-    static let comparisonCriteria = [
-        "SwiftUI shape fit",
-        "AppKit detachment burden",
-        "Windows-native affordance fit",
-        "Theming/layout carryover",
-        "Expected manual rewrite cost",
-    ]
-
     static let serverTodoMarkers = [
         "TODO(Helios): Replace NSOpenPanel-driven endpoint tester flows with a Windows file picker service.",
         "TODO(Helios): Route clipboard writes through ClipboardService instead of NSPasteboard.",
-        "TODO(Helios): Route external links and file launches through ExternalLinkService instead of NSWorkspace.",
+        "TODO(Helios): Route NSWorkspace-powered links and launches through ExternalLinkService.",
         "TODO(Helios): Rebuild the interactive endpoint tester incrementally once the Windows shell owns the server diagnostics flow.",
     ]
 
@@ -105,5 +97,18 @@ enum HeliosPorterSupport {
 
     static func containsAny(_ needles: [String], in source: String) -> Bool {
         needles.contains { source.contains($0) }
+    }
+
+    static func deduplicatedBridgeCapabilities(in report: PortabilityReport) -> [BridgeCapability] {
+        var seen: Set<BridgeCapability> = []
+        var ordered: [BridgeCapability] = []
+
+        for capability in report.findings.flatMap(\.bridgeCapabilities) {
+            if seen.insert(capability).inserted {
+                ordered.append(capability)
+            }
+        }
+
+        return BridgeCapability.allCases.filter { ordered.contains($0) }
     }
 }

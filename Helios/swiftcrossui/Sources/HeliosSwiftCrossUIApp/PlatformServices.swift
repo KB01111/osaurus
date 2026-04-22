@@ -1,5 +1,10 @@
 import Foundation
 
+struct FilePickerRequest: Equatable {
+    let title: String
+    let allowedExtensions: [String]
+}
+
 protocol ClipboardService {
     func copy(_ text: String)
 }
@@ -19,11 +24,16 @@ protocol SettingsNavigationService {
     func showAPIReference()
 }
 
+protocol FilePickerService {
+    func pickFile(_ request: FilePickerRequest) -> String?
+}
+
 struct PlatformServices {
     let clipboard: ClipboardService
     let links: ExternalLinkService
     let server: ServerControlService
     let navigation: SettingsNavigationService
+    let filePicker: FilePickerService
 }
 
 struct PlaceholderClipboardService: ClipboardService {
@@ -45,11 +55,16 @@ struct PlaceholderSettingsNavigationService: SettingsNavigationService {
     func showAPIReference() {}
 }
 
+struct PlaceholderFilePickerService: FilePickerService {
+    func pickFile(_ request: FilePickerRequest) -> String? { nil }
+}
+
 extension PlatformServices {
     static let placeholder = PlatformServices(
         clipboard: PlaceholderClipboardService(),
         links: PlaceholderExternalLinkService(),
         server: PlaceholderServerControlService(),
-        navigation: PlaceholderSettingsNavigationService()
+        navigation: PlaceholderSettingsNavigationService(),
+        filePicker: PlaceholderFilePickerService()
     )
 }

@@ -1,6 +1,7 @@
 {
   "findings" : [
     {
+      "bridgeCapabilities" : [],
       "class" : "adapter_needed",
       "platformDependencies" : [
         "Theme environment",
@@ -12,27 +13,20 @@
         "Reads live Osaurus singleton managers, so Helios needs its own state and service adapters before the view can be reused.",
         "Relies on the custom theme environment and shared chrome components that need Windows-native Helios counterparts."
       ],
-      "recommendedTargets" : [
-        "swiftcrossui",
-        "shaft"
-      ],
       "sourcePath" : "Packages/OsaurusCore/Views/Management/ManagementView.swift",
       "symbols" : [
         "ManagementView"
       ]
     },
     {
+      "bridgeCapabilities" : [],
       "class" : "portable",
       "platformDependencies" : [
         "SwiftUI"
       ],
       "reasons" : [
         "Defines tab metadata and information architecture that can transfer directly into Helios.",
-        "Avoids AppKit-only APIs and can be re-expressed in either scaffold target without platform shims."
-      ],
-      "recommendedTargets" : [
-        "swiftcrossui",
-        "shaft"
+        "Avoids AppKit-only APIs and can be carried into the shared Helios manifest unchanged."
       ],
       "sourcePath" : "Packages/OsaurusCore/Models/Configuration/ManagementTab.swift",
       "symbols" : [
@@ -40,6 +34,11 @@
       ]
     },
     {
+      "bridgeCapabilities" : [
+        "clipboard",
+        "external_link",
+        "file_picker"
+      ],
       "class" : "rewrite",
       "platformDependencies" : [
         "AppKit",
@@ -55,12 +54,8 @@
       "reasons" : [
         "Couples the slice directly to macOS-only behavior that cannot move across as-is.",
         "Uses NSPasteboard for clipboard flows that must become ClipboardService calls in Helios.",
-        "Uses NSWorkspace for external navigation and file launching, which must be rebound to Windows shell services.",
-        "Uses NSOpenPanel for picker-heavy interactions, which need a Windows picker implementation and a redesigned server tools surface."
-      ],
-      "recommendedTargets" : [
-        "swiftcrossui",
-        "shaft"
+        "Uses NSWorkspace for external navigation and file launching, which must be rebound to ExternalLinkService in the Windows bridge.",
+        "Uses NSOpenPanel for picker-heavy interactions, which need FilePickerService and a redesigned server tools surface."
       ],
       "sourcePath" : "Packages/OsaurusCore/Views/Settings/ServerView.swift",
       "symbols" : [
@@ -70,6 +65,7 @@
       ]
     },
     {
+      "bridgeCapabilities" : [],
       "class" : "adapter_needed",
       "platformDependencies" : [
         "Theme environment",
@@ -80,10 +76,6 @@
         "Uses SwiftUI-shaped composition that maps well into a Helios management slice, but it still depends on Osaurus-owned styling and navigation primitives.",
         "Relies on the custom theme environment and shared chrome components that need Windows-native Helios counterparts."
       ],
-      "recommendedTargets" : [
-        "swiftcrossui",
-        "shaft"
-      ],
       "sourcePath" : "Packages/OsaurusCore/Views/Management/SidebarNavigation.swift",
       "symbols" : [
         "SidebarItemData",
@@ -92,6 +84,7 @@
       ]
     },
     {
+      "bridgeCapabilities" : [],
       "class" : "adapter_needed",
       "platformDependencies" : [
         "Theme environment",
@@ -102,10 +95,6 @@
         "Uses SwiftUI-shaped composition that maps well into a Helios management slice, but it still depends on Osaurus-owned styling and navigation primitives.",
         "Relies on the custom theme environment and shared chrome components that need Windows-native Helios counterparts."
       ],
-      "recommendedTargets" : [
-        "swiftcrossui",
-        "shaft"
-      ],
       "sourcePath" : "Packages/OsaurusCore/Views/Management/ManagerHeader.swift",
       "symbols" : [
         "ManagerHeader",
@@ -114,6 +103,7 @@
       ]
     },
     {
+      "bridgeCapabilities" : [],
       "class" : "adapter_needed",
       "platformDependencies" : [
         "Theme environment",
@@ -123,10 +113,6 @@
         "Uses SwiftUI-shaped composition that maps well into a Helios management slice, but it still depends on Osaurus-owned styling and navigation primitives.",
         "Relies on the custom theme environment and shared chrome components that need Windows-native Helios counterparts."
       ],
-      "recommendedTargets" : [
-        "swiftcrossui",
-        "shaft"
-      ],
       "sourcePath" : "Packages/OsaurusCore/Views/Management/SharedSidebarComponents.swift",
       "symbols" : [
         "SidebarStyle",
@@ -135,6 +121,7 @@
       ]
     },
     {
+      "bridgeCapabilities" : [],
       "class" : "adapter_needed",
       "platformDependencies" : [
         "Theme environment",
@@ -144,10 +131,6 @@
       "reasons" : [
         "Uses SwiftUI-shaped composition that maps well into a Helios management slice, but it still depends on Osaurus-owned styling and navigation primitives.",
         "Relies on the custom theme environment and shared chrome components that need Windows-native Helios counterparts."
-      ],
-      "recommendedTargets" : [
-        "swiftcrossui",
-        "shaft"
       ],
       "sourcePath" : "Packages/OsaurusCore/Views/Common/AnimatedTabSelector.swift",
       "symbols" : [
